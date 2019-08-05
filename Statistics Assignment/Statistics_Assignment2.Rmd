@@ -1,0 +1,152 @@
+---
+Title: MATH1324 Assignment 2
+output:
+  html_notebook: default
+  pdf_document: default
+  word_document: default
+subtitle: Supermarket Price Wars
+---
+
+## Group Details
+
+* Anooja Mathew (s3767921)
+* Lipika Sharma (s3764073) 
+* Bhavy Shukla (s3776464)
+
+## Executive Statement
+
+The investigation was performed to analyse the prices of Coles and Woolworths and statistically prove which one of them is more expensive. The prices of products from a stratified sample set of 90 products belonging to different categories like grocery, household, heath and beauty were collected from Coles and Woolworths. The paired t-test hypothesis was used to derive the conclusion. The mean value of the differences in prices between the stores was taken as 0 for the null hypothesis. The t-statistic was then compared to a two-tailed t-critical value t∗ and a statistically significant difference was found between the prices. This led to rejecting the null hypothesis and accepting the alternate hypothesis.
+
+## Load Packages and Data
+
+```{r}
+library(dplyr)
+library(qqtest)
+library(car)
+library(granova)
+library(readxl)
+Assignment_Data <- read_excel("D:/Data Science/Semester 1/Statistics/Assigments/Assignment 2/Assignment_Data.xlsx")
+View(Assignment_Data)
+```
+
+## Summary Statistics
+
+Summary for Coles prices
+```{r}
+Assignment_Data %>% summarise(Min = min(Coles,na.rm = TRUE),
+Q1 = quantile(Coles,probs = .25,na.rm = TRUE),
+Median = median(Coles, na.rm = TRUE),
+Q3 = quantile(Coles,probs = .75,na.rm = TRUE),
+Max = max(Coles ,na.rm = TRUE),
+Mean = mean(Coles, na.rm = TRUE),
+SD = sd(Coles, na.rm = TRUE),
+n = n(),
+Missing = sum(is.na(Coles)))
+```
+
+
+Summary for Woolworths prices
+```{r}
+Assignment_Data %>% summarise(Min = min(Woolworths,na.rm = TRUE),
+Q1 = quantile(Woolworths,probs = .25,na.rm = TRUE),
+Median = median(Woolworths, na.rm = TRUE),
+Q3 = quantile(Woolworths ,probs = .75,na.rm = TRUE),
+Max = max(Woolworths ,na.rm = TRUE),
+Mean = mean(Woolworths, na.rm = TRUE),
+SD = sd(Woolworths, na.rm = TRUE),
+n = n(),
+Missing = sum(is.na(Woolworths)))
+```
+
+
+Summary for Difference between Coles and Woolworth prices
+```{r}
+Assignment_Data <- Assignment_Data %>% mutate(Price_Difference = Coles - Woolworths)
+
+Assignment_Data %>% summarise(Min = min(Price_Difference,na.rm = TRUE),
+Q1 = quantile(Price_Difference,probs = .25,na.rm = TRUE),
+Median = median(Price_Difference, na.rm = TRUE),
+Q3 = quantile(Price_Difference,probs = .75,na.rm = TRUE),
+Max = max(Price_Difference,na.rm = TRUE),
+Mean = mean(Price_Difference, na.rm = TRUE),
+SD = sd(Price_Difference, na.rm = TRUE),
+n = n(),
+Missing = sum(is.na(Price_Difference)))
+```
+
+
+Q-Q plots for Coles
+```{r}
+qqPlot(Assignment_Data$Coles,dist="norm");
+```
+Q-Q plots for Woolworths
+```{r}
+qqPlot(Assignment_Data$Woolworths, dist="norm")
+```
+
+```{r}
+names=c("COLES", "WOOLWORTHS")
+Assignment_Data %>% boxplot(Assignment_Data$Coles, Assignment_Data$Woolworths, names=names, data = .,
+main="Price Variation in Coles and Woolworths",
+xlab="Supermarkets", ylab="Price in AUD", col=c("Purple","Blue"))
+```
+
+
+
+## Hypothesis Test
+
+The statistical hypotheses for the paired-samples t-test are as follows:
+
+Null Hypothesis: The difference between the mean values of products from Coles and Woolworths is 0 i.e. H0:μ1−μ2=0
+
+Alternate Hypothesis: The difference between the mean values of products from Coles and Woolworths is not 0 i.e. H0:μ1−μ2 ≠ 0
+
+Paired t -test
+```{r}
+
+ t.test(Assignment_Data$Coles, Assignment_Data$Woolworths,
+       paired = TRUE,
+       alternative = "two.sided")
+```
+One sample t-test
+```{r}
+
+t.test(Assignment_Data$Price_Difference, conf.level = 0.95, alternative = "two.sided")
+```
+ 
+Critical value t* for the paired t-test are ±1.98 as below. As t=2.12 is more extreme than 1.98, H0 should be rejected. There was a statistically significant mean difference between Coles and Woolworths.
+```{r}
+qt(p = 0.025, df = 89)
+```
+
+The two-tailed p-value can be calculated as below which rounds to p <.037 reported in the paired samples t-test. As p < .05, we reject H0. There was a statistically significant mean difference.:
+```{r}
+2*pt(q = -2.12, df = 89)
+```
+
+
+Paired Samples t-test Visualisation
+
+```{r}
+granova.ds(
+  data.frame(Assignment_Data$Coles, Assignment_Data$Woolworths),
+  xlab = "Coles Price",
+  ylab = "Woolworths Price"
+  )
+```
+
+
+## Interpretation
+
+A paired-samples t-test was used to test for a significant mean difference between the prices for Coles and Woolworths. The mean difference for the stores was found to be 0.311 (SD = 1.39). Visual inspection of the Q-Q plots suggested that the data were not approximately normally distributed. The paired-samples t-test found a statistically significant mean difference between stores, t(df=89)=2.12, p<.03, 95% [-0.02, 0.60]. Price range for products of Woolworths were found to be significantly less as compared to Coles.
+
+
+## Discussion 
+
+The investigation above helps us to conclude that Woolworths is cheaper than Coles. However, there were limitations faced with respect to the sample data collected. The sample size taken is much less than the actual sample size i.e. only 90 products were considered for the analysis instead of a larger product range. Another major limitation would be the frequent change in prices of both the stores. The analysis would have been more productive if a larger sample size consisting of a wider proportion of the products were collected .
+
+##References:
+https://shop.coles.com.au/a/a-national/everything/browse
+https://www.woolworths.com.au/shop/discover/shopping-online 
+
+
